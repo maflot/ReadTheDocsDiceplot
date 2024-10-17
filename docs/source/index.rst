@@ -1,6 +1,10 @@
 Dice-plot: a package for high dimensional categorical data visualization
 ========================================================================
 
+.. image:: https://www.r-pkg.org/badges/version/diceplot
+    :target: https://CRAN.R-project.org/package=diceplot
+    :alt: CRAN Status Badge
+
 .. note::
    This project is under active development.
 
