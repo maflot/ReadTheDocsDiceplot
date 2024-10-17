@@ -10,11 +10,7 @@ Requirements and installation
 For installing the latest version of diceplot please clone the repository from github.
 For installing the package you can use the following methods:
 
-.. caution::
-
-   Not feasible submission still pending
-
-Installation from CRAN:
+Direct installation from CRAN:
 
 .. code-block:: r
 
