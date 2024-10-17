@@ -1,4 +1,4 @@
-Dice-plot: a package for high dimensional categorical data visualization
+Diceplot: a package for high dimensional categorical data visualization
 ========================================================================
 
 .. image:: https://www.r-pkg.org/badges/version/diceplot
