@@ -30,7 +30,7 @@ Features
 
 
 
-diceplot
+Diceplot
 --------
 .. caution::
 
@@ -41,13 +41,13 @@ You can find the `R Source Code <https://github.com/maflot/DicePlot_deprecated>`
 .. toctree::
    R
 
-pydiceplot
+pyDiceplot
 --------
 .. caution::
 
    Repository is still private
 
-You can find the `Python Source Code <https://github.com/maflot/pyDicePlot/tree/main>`_ on github.
+You can find the `python Source Code <https://github.com/maflot/pyDicePlot/tree/main>`_ on github.
 
 .. toctree::
    python
