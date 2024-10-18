@@ -16,10 +16,6 @@ Direct installation from CRAN:
 
     install.packages("diceplot")
 
-.. caution::
-
-   Not feasible as the repository is still private
-
 You can install the ``DicePlot`` package directly from GitHub using the ``devtools`` package:
 
 .. code-block:: r
