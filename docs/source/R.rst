@@ -49,7 +49,9 @@ DicePlot
 Example Usage
 -------------
 
-Here is a simple example of how to use the ``DicePlot`` package:
+Here is a simple example of how to use the ``DicePlot`` package using dummy data.
+The example shows a dummy dataframe containing three hypothetical categorical variables: ``CellType``, ``Pathway``, and ``PathologyVariable``.
+The ``Group`` variable is used to assign different colors to the pathways.
 
 .. code-block:: r
 
@@ -188,7 +190,7 @@ Example Usage
    )
 
    # Add the appropriate vars to each Contrast
-   set.seed(123) # Ensure reproducibility
+   set.seed(123) 
    data_type1 <- data %>% 
    filter(Group == "Type1") %>% 
    mutate(var = sample(vars_type1, n(), replace = TRUE))
@@ -207,7 +209,6 @@ Example Usage
       adj_p_value = runif(n(), min = 0.0001, max = 0.05)
    )
 
-   # Use the modified function with custom parameters
    p <- domino_plot(
    data = data,
    gene_list = gene_list,
