@@ -150,7 +150,7 @@ Sample Output
 .. figure:: r_plots/dice_plot_6_example_dice_plot.png
    :alt: Sample Dice with 6 categories Plot
 
-   *Figure: A sample dice plots with differing category numbers generated using the ``DicePlot`` package.*
+   *Figure: A sample dice plots*
 
 Dominoplot
 ~~~~~~~~~~
@@ -160,6 +160,9 @@ We  will check the gene expression data for different cell types and contrasts.
 
 Example Usage
 -------------
+The sample code is examing dummy data for three genes, three cell types, and two contrasts.
+The contrasts are defined as ``Type1`` and ``Type2`` with three and four variables, respectively.
+
 .. code-block:: r
 
    # Load necessary libraries
@@ -209,6 +212,7 @@ Example Usage
       adj_p_value = runif(n(), min = 0.0001, max = 0.05)
    )
 
+   # call the domino function
    p <- domino_plot(
    data = data,
    gene_list = gene_list,
