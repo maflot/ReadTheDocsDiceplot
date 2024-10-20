@@ -32,10 +32,6 @@ Features
 
 Diceplot
 --------
-.. caution::
-
-   Repository is still private
-
 You can find the `R Source Code <https://github.com/maflot/DicePlot>`_ on github.
 
 .. toctree::
