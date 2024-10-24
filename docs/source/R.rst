@@ -43,13 +43,13 @@ After installation, load the ``DicePlot`` package into your R session:
 
    library(diceplot)
 
-DicePlot
+Diceplot
 ~~~~~~~~
 
 Example Usage
 -------------
 
-Here is a simple example of how to use the ``DicePlot`` package using dummy data.
+Here is a simple example of how to use the ``diceplot`` package using dummy data.
 The example shows a dummy dataframe containing three hypothetical categorical variables: ``CellType``, ``Pathway``, and ``PathologyVariable``.
 The ``Group`` variable is used to assign different colors to the pathways.
 
