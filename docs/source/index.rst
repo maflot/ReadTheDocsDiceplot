@@ -43,10 +43,6 @@ You can find the `R Source Code <https://github.com/maflot/DicePlot>`_ on github
 
 pyDiceplot
 --------
-.. caution::
-
-   Repository is still private
-
 You can find the `python Source Code <https://github.com/maflot/pyDicePlot/tree/main>`_ on github.
 
 .. toctree::
