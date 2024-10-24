@@ -19,9 +19,8 @@ Direct installation from CRAN:
 You can install the latest version of ``DicePlot`` package directly from GitHub using the ``devtools`` package
 
 .. warning::
-    At the current stage the code might not be compatible with the CRAN release!
-    please check the change-log in the github repository for detailed information
-
+    At the current stage the github code might not be compatible with the CRAN release and with the tutorial in this documentation!
+    please check the change-log in the github repository and the example listed there for detailed information
 
 .. code-block:: r
 
