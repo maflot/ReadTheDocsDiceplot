@@ -5,6 +5,10 @@ Diceplot: a package for high dimensional categorical data visualization
     :target: https://CRAN.R-project.org/package=diceplot
     :alt: CRAN Status Badge
 
+.. image:: https://badge.fury.io/py/pydiceplot.svg
+    :target: https://pypi.org/project/pydiceplot/
+    :alt: PyPI Status Badge
+
 .. note::
    This project is under active development.
 
