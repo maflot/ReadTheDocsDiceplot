@@ -47,8 +47,6 @@ After installation, load the ``DicePlot`` package into your R session:
 
    library(diceplot)
 
-Diceplot
-~~~~~~~~
 
 Example Usage of DicePlot v0.1.2
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
