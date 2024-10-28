@@ -51,7 +51,7 @@ Diceplot
 ~~~~~~~~
 
 Example Usage of DicePlot v0.1.2
-================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here is a simple example demonstrating how to use the `DicePlot v0.1.2` package.
 For additional examples, please refer to the `tests/` folder.
@@ -160,7 +160,8 @@ Explanation:
 
 
 Example Usage v0.1.1
--------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. warning:: 
     Deprecated
 
