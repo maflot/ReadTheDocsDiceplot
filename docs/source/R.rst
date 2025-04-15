@@ -354,45 +354,6 @@ For additional examples, please refer to the `tests/` folder.
 
    *Figure: A sample dice plots*
 
-Example Usage: Domino Plot
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Here is an example demonstrating how to use the `DicePlot` package to create a domino plot.
-
-.. code-block:: r
-
-   # Load necessary libraries
-   library(diceplot)
-   library(dplyr)
-   library(tidyr)
-   library(ggplot2)
-
-   # Load dataset
-   zebra.df = read.csv(file = "data/ZEBRA_sex_degs_set.csv")
-
-   genes = c("SPP1","APOE","SERPINA1","PINK1","ANGPT1","ANGPT2","APP","CLU","ABCA7")
-   zebra.df <- zebra.df %>% filter(gene %in% genes) %>%
-     filter(contrast %in% c("MS-CT","AD-CT","ASD-CT","FTD-CT","HD-CT")) %>%
-     mutate(cell_type = factor(cell_type, levels = sort(unique(cell_type)))) %>%
-     filter(PValue < 0.05)
-
-   # Create a basic domino plot
-   p_basic <- domino_plot(
-     data = zebra.df,      # Input data
-     gene_list = genes,    # List of genes to include
-     var_id = "contrast",  # Variable that identifies different conditions
-     x = "gene",           # Variable for x-axis
-     y = "cell_type",      # Variable for y-axis
-     contrast = "sex",     # Contrast variable (e.g., male vs female)
-     log_fc = "logFC",     # Column name for log fold change
-     p_val = "FDR"         # Column name for p-values
-   )
-
-   # Display the plot
-   print(p_basic)
-
-.. figure:: r_plots/joined_domino_plot_example.png
-   :alt: Sample domino plot
 
 Domino Plot Tutorial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
