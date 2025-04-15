@@ -1,4 +1,4 @@
-R - Diceplot
+R - DicePlot
 =======================
 
 .. image:: https://www.r-pkg.org/badges/version/diceplot

@@ -34,14 +34,14 @@ Features
 
 
 
-Diceplot
+DicePlot
 --------
 You can find the `R Source Code <https://github.com/maflot/DicePlot>`_ on github.
 
 .. toctree::
    R
 
-pyDiceplot
+pyDicePlot
 --------
 You can find the `python Source Code <https://github.com/maflot/pyDicePlot/tree/main>`_ on github.
 
