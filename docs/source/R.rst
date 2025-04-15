@@ -54,10 +54,6 @@ Direct installation from CRAN (Recommended):
 
 Install from GitHub:
 
-.. warning::
-    At the current stage the github code might not be compatible with the CRAN release and with the tutorial in this documentation!
-    please check the change-log in the github repository and the example listed there for detailed information
-
 .. code-block:: r
 
    # Install devtools if you haven't already
@@ -71,7 +67,7 @@ Install from Local Files:
 
    install.packages("$path on your local machine$/DicePlot/diceplot", repos = NULL, type = "source")
 
-4. Load the Package
+1. Load the Package
 ------------------
 
 After installation, load the ``DicePlot`` package into your R session:
@@ -80,9 +76,11 @@ After installation, load the ``DicePlot`` package into your R session:
 
    library(diceplot)
 
-Example Usage: Real-World Data
+Diceplot: Tutorial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Real-World Example
+-------------------
 Here is a real-world example using data from Huang et al. (2021) showing gene expression patterns across different immune cell types and demographic groups.
 
 .. code-block:: r
@@ -264,9 +262,8 @@ Here is a real-world example using data from Huang et al. (2021) showing gene ex
 .. figure:: r_plots/pnas_diceplot_example.png
    :alt: PNAS Example Dice Plot
 
-Example Usage: Simple Example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+Artificial example
+----------------------------
 Here is a simple example demonstrating how to use the `DicePlot v0.1.2` package.
 For additional examples, please refer to the `tests/` folder.
 
@@ -697,73 +694,7 @@ Step 4: Create a map with geom_dice_sf
 .. figure:: r_plots/saarland_geom_dice_sf.png
    :alt: Saarland geom_dice_sf Example
 
-Python Integration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For using dice plots in Python, please refer to `pyDicePlot <https://github.com/maflot/pyDicePlot/tree/main>`_.
-
-Documentation
-~~~~~~~~~~~~
-
-For full documentation and additional examples, please refer to the `documentation <https://dice-and-domino-plot.readthedocs.io/en/latest/index.html#>`_.
-
-Features
-~~~~~~~~
-
-- **Visualize Complex Data:** Easily create plots for datasets with multiple categorical variables.
-- **Customization:** Customize plots with titles, labels, and themes.
-- **Integration with ggplot2:** Leverages the power of `ggplot2` for advanced plotting capabilities.
-
-Contributing
-~~~~~~~~~~~
-
-We welcome contributions from the community! If you'd like to contribute:
-
-1. Fork the repository on GitHub.
-2. Create a new branch for your feature or bug fix.
-3. Submit a pull request with a detailed description of your changes.
-
-Contact
-~~~~~~~
-
-If you have any questions, suggestions, or issues, please open an issue on GitHub.
-
-Change Log v0.1.7
-~~~~~~~~~~~~~~~~
-
-- Update the examples to real world data
-- move example files out of test to example
-
-geom_dice_sf
------------
-
-- add prototype for geom_dice_sf function
-- see examples/geom_dice_sf_test2.R
-
-domino_plot function
--------------------
-
-- Add proper legend to the plot, remove intermediate plot
-- Default logfc crop to NULL
-
-Citation
-~~~~~~~~
-
-If you use this code or the R and Python packages for your own work, please cite diceplot as:
-
-> M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arxiv, 2024. `doi:10.48550/arXiv.2410.23897 <https://doi.org/10.48550/arXiv.2410.23897>`_
-
-BibTeX entry:
-
-.. code-block:: bibtex
-
-   @article{flotea2024,
-       author = {Flotho, M. and Flotho, P. and Keller, A.},
-       title = {Diceplot: A package for high dimensional categorical data visualization},
-       year = {2024},
-       journal = {arXiv preprint},
-       doi = {https://doi.org/10.48550/arXiv.2410.23897}
-   }
 
 References
 ~~~~~~~~~
