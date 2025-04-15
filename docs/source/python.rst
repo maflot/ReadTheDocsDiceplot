@@ -1,4 +1,4 @@
-Python - pyDiceplot
+Python - pyDicePlot
 ======================
 
 .. image:: https://badge.fury.io/py/pydiceplot.svg
