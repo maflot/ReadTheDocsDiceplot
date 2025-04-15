@@ -1,4 +1,4 @@
-Diceplot: a package for high dimensional categorical data visualization
+DicePlot: a package for high dimensional categorical data visualization
 ========================================================================
 
 .. image:: https://www.r-pkg.org/badges/version/diceplot
@@ -13,7 +13,7 @@ Diceplot: a package for high dimensional categorical data visualization
    This project is under active development.
 
 .. figure:: ./Diceplot-graphical-abstract.png
-   :alt: Diceplot aims to bridge the gap between high- and low-level visualizations of your data.
+   :alt: DicePlot aims to bridge the gap between high- and low-level visualizations of your data.
 
 Displaying multidimensional categorical data often poses a challenge in life sciences to get a comprehensive overview of
 the underlying data. This is not limited to but holds in particular for pathway analysis across multiple conditions. Here
@@ -25,8 +25,8 @@ Features
 ~~~~~~~~~~~~~~~~~~~
 
 - **Visualize Complex Data:** Easily create plots for datasets with multiple categorical variables.
-- **Dice Plot:** Create dice plots for datasets with more than two categorical variables.
-- **Dominoplot:** Visualize gene expression data for different cell types and contrasts.
+- **DicePlot:** Create DicePlots for datasets with more than two categorical variables.
+- **DominoPlot:** Visualize gene expression data for different cell types and contrasts.
 - **R and python**: Implementations in both R and python to ensure easy access and application.
 - **Customization:** Customize plots with titles, labels, and themes.
 - **Integration with ggplot2:** Leverages the power of ``ggplot2`` for advanced plotting capabilities.
@@ -68,7 +68,7 @@ If you have any questions, suggestions, or issues, please open an issue on GitHu
 Citation
 ~~~~~~~~~~~~~~~~~~~
 
-If you use this code or the R and Python packages for your own work, please cite Diceplot as:
+If you use this code or the R and Python packages for your own work, please cite DicePlot as:
 
 **M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arxiv, 2024.**
 *doi:10.48550/arXiv.2410.23897*  

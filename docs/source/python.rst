@@ -5,7 +5,7 @@ Python - pyDicePlot
     :target: https://pypi.org/project/pydiceplot/
     :alt: PyPI Status Badge
 
-The pyDicePlot package allows you to create visualizations (dice plots) for datasets with more than two categorical variables and additional continuous variables. This tool is particularly useful for exploring complex categorical data and their relationships with continuous variables.
+The pyDicePlot package allows you to create visualizations (DicePlots) for datasets with more than two categorical variables and additional continuous variables. This tool is particularly useful for exploring complex categorical data and their relationships with continuous variables.
 
 Requirements and installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -39,10 +39,10 @@ Sample Output
 
 .. raw:: html
     :file: python_plots/dice_plot_6_example.html
-Figure: A sample dice plot generated using the pyDicePlot package.
+Figure: A sample DicePlot generated using the pyDicePlot package.
 
 
-Diceplot
+DicePlot
 ~~~~~~~~
 Here is a simple example of how to use the ``pydiceplot`` package using dummy data.
 The example shows a dummy dataframe containing three hypothetical categorical variables: ``CellType``, ``Pathway``, and ``PathologyVariable``.
@@ -103,7 +103,7 @@ Example Usage
 .. note::
    Todo
 
-Dominoplot
+DominoPlot
 ~~~~~~~~~~
 .. note::
    Todo
