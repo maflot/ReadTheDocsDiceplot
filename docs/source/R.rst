@@ -5,18 +5,54 @@ R - Diceplot
     :target: https://CRAN.R-project.org/package=diceplot
     :alt: CRAN Status Badge
 
+.. image:: https://cranlogs.r-pkg.org/badges/grand-total/diceplot
+    :target: https://CRAN.R-project.org/package=diceplot
+    :alt: CRAN Downloads
+
+.. note::
+    This repository is in active development
+
+The **DicePlot** package allows you to create visualizations (dice plots) for datasets with more than two categorical variables and additional continuous variables. This tool is particularly useful for exploring complex categorical data and their relationships with continuous variables.
+
 Requirements and installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-For installing the latest version of diceplot please clone the repository from github.
-For installing the package you can use the following methods:
 
-Direct installation from CRAN:
+1. Install R
+------------
+Ensure that you have R installed on your system. You can download it from `The Comprehensive R Archive Network (CRAN) <https://cran.r-project.org/>`_.
+Or use conda:
+
+.. code-block:: r
+
+    conda create -n diceplot -c conda-forge r-base -y
+    conda activate diceplot
+
+2. Install Required Packages
+---------------------------
+The `DicePlot` package depends on several other R packages. Install them by running:
+
+.. code-block:: r
+
+    install.packages(c(
+        "devtools",
+        "dplyr",
+        "ggplot2",
+        "tidyr",
+        "data.table",
+        "ggdendro"
+    ))
+
+3. Install DicePlot
+------------------
+You have three options for installing the DicePlot package:
+
+Direct installation from CRAN (Recommended):
 
 .. code-block:: r
 
     install.packages("diceplot")
 
-You can install the latest version of ``DicePlot`` package directly from GitHub using the ``devtools`` package
+Install from GitHub:
 
 .. warning::
     At the current stage the github code might not be compatible with the CRAN release and with the tutorial in this documentation!
@@ -29,17 +65,14 @@ You can install the latest version of ``DicePlot`` package directly from GitHub 
    # Install DicePlot from GitHub
    devtools::install_github("maflot/DicePlot/diceplot")
 
-Install DicePlot from Files
----------------------------
-
-Download the repository and run the following code to install the package:
+Install from Local Files:
 
 .. code-block:: r
 
    install.packages("$path on your local machine$/DicePlot/diceplot", repos = NULL, type = "source")
 
-Load the Package
-----------------
+4. Load the Package
+------------------
 
 After installation, load the ``DicePlot`` package into your R session:
 
@@ -47,15 +80,195 @@ After installation, load the ``DicePlot`` package into your R session:
 
    library(diceplot)
 
+Example Usage: Real-World Data
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Example Usage of DicePlot v0.1.2
+Here is a real-world example using data from Huang et al. (2021) showing gene expression patterns across different immune cell types and demographic groups.
+
+.. code-block:: r
+
+   # Load necessary libraries
+   library(readxl)
+   library(dplyr)
+   library(tidyr)
+   library(stringr)
+   library(writexl)
+   library(RColorBrewer)
+   library(UpSetR)
+   library(ggplot2)
+   library(diceplot)
+
+   # Set your file path
+   file_path <- "data/pnas.2023216118.sd05.xlsx"
+
+   # Function to create the properly formatted CSV
+   process_excel_to_csv <- function(file_path) {
+     # Read Excel file with detailed options
+     raw_data <- read_excel(file_path, col_names = FALSE, na = "", trim_ws = TRUE)
+     
+     # Extract cell types from row 2
+     cell_types_row <- raw_data[2,]
+     
+     # Extract demographic info from row 3
+     demo_row <- raw_data[3,]
+     
+     # Create a list to store all transformed data
+     all_data <- list()
+     
+     # Define cell type mapping
+     cell_type_map <- c(
+       "NK" = "Natural Killer (NK) cell",
+       "TC" = "T cell (TC)",
+       "BC" = "B cell (BC)",
+       "DC" = "Dendritic cell (DC)",
+       "MC" = "Monocyte (MC)"
+     )
+     
+     # Process each cell type column
+     cell_type_columns <- c()
+     for (i in 1:ncol(raw_data)) {
+       if (!is.na(cell_types_row[[i]]) && cell_types_row[[i]] != "") {
+         cell_type_columns <- c(cell_type_columns, i)
+       }
+     }
+     
+     # Process each cell type column and its associated demographic columns
+     for (col_idx in cell_type_columns) {
+       cell_type <- cell_types_row[[col_idx]]
+       cell_type_full <- cell_type_map[cell_type]
+       
+       for (offset in 0:3) {
+         demo_col <- col_idx + offset
+         
+         if (demo_col <= ncol(raw_data) && !is.na(demo_row[[demo_col]]) && demo_row[[demo_col]] != "") {
+           demo_info <- demo_row[[demo_col]]
+           
+           age <- case_when(
+             substr(demo_info, 4, 4) == "O" ~ "old",
+             substr(demo_info, 4, 4) == "Y" ~ "young",
+             TRUE ~ NA_character_
+           )
+           
+           sex <- case_when(
+             substr(demo_info, 5, 5) == "M" ~ "male",
+             substr(demo_info, 5, 5) == "F" ~ "female",
+             TRUE ~ NA_character_
+           )
+           
+           for (row_idx in 4:nrow(raw_data)) {
+             gene <- raw_data[row_idx, demo_col][[1]]
+             
+             if (is.na(gene) || gene == "") {
+               next
+             }
+             
+             gene_row <- data.frame(
+               id = paste0(cell_type, "_", demo_info, "_", gene),
+               gene = gene,
+               cell_type_code = cell_type,
+               cell_type = cell_type_full,
+               age_code = substr(demo_info, 4, 4),
+               age = age,
+               sex_code = substr(demo_info, 5, 5),
+               sex = sex,
+               demo_code = demo_info
+             )
+             
+             all_data[[length(all_data) + 1]] <- gene_row
+           }
+         }
+       }
+     }
+     
+     return(bind_rows(all_data))
+   }
+
+   # Process the data
+   processed_data <- process_excel_to_csv(file_path)
+
+   # Create a demographic combination column
+   processed_data <- processed_data %>%
+     mutate(demo_combination = case_when(
+       age == "old" & sex == "male" ~ "Old Male",
+       age == "old" & sex == "female" ~ "Old Female",
+       age == "young" & sex == "male" ~ "Young Male",
+       age == "young" & sex == "female" ~ "Young Female",
+       TRUE ~ paste(age, sex)
+     ))
+
+   # Order the demographic combinations factor
+   processed_data$demo_combination <- factor(
+     processed_data$demo_combination,
+     levels = c("Old Male", "Old Female", "Young Male", "Young Female")
+   )
+
+   # Order cell types
+   processed_data$cell_type <- factor(
+     processed_data$cell_type,
+     levels = c(
+       "Natural Killer (NK) cell",
+       "T cell (TC)",
+       "B cell (BC)",
+       "Dendritic cell (DC)",
+       "Monocyte (MC)"
+     )
+   )
+
+   # Create summary table with gene counts
+   gene_counts <- processed_data %>%
+     group_by(gene, cell_type, demo_combination) %>%
+     summarize(tmp_count = n(), .groups = "drop")
+
+   # Define colors for demographic combinations
+   demo_colors <- c(
+     "Old Male" = "#E41A1C",     # Red
+     "Old Female" = "#377EB8",   # Blue
+     "Young Male" = "#4DAF4A",   # Green
+     "Young Female" = "#984EA3"  # Purple
+   )
+
+   # Get top 25 most frequent genes
+   top_25_genes <- processed_data %>%
+     count(gene) %>%
+     arrange(desc(n)) %>%
+     head(25) %>%
+     pull(gene)
+
+   # Filter gene_counts to include only top 25 genes
+   filtered_gene_counts <- gene_counts %>%
+     filter(gene %in% top_25_genes)
+
+   # Add default group column
+   filtered_gene_counts$default = ""
+
+   # Create the diceplot
+   p_dice_filtered <- dice_plot(
+     data = filtered_gene_counts,
+     x = "gene",                    # x-axis: genes
+     y = "cell_type",               # y-axis: cell types
+     z = "demo_combination",        # z parameter: demographic combinations
+     cluster_by_column = T,
+     cluster_by_row = F,
+     title = "Gene Expression across Cell Types and Demographics\n(Top 25 Genes)",
+     z_colors = demo_colors,        # Use the proper color palette
+     max_dot_size = 6,
+     min_dot_size = 3,
+     legend_width = 0.2,
+     legend_height = 0.25,
+     show_legend = T
+   )
+
+   # Display the diceplot
+   print(p_dice_filtered)
+
+.. figure:: r_plots/pnas_diceplot_example.png
+   :alt: PNAS Example Dice Plot
+
+Example Usage: Simple Example
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here is a simple example demonstrating how to use the `DicePlot v0.1.2` package.
 For additional examples, please refer to the `tests/` folder.
-
-Loading Necessary Libraries
----------------------------
 
 .. code-block:: r
 
@@ -69,14 +282,6 @@ Loading Necessary Libraries
    library(grid)
    library(cowplot)
    library(RColorBrewer)
-
-
-Defining Variables
-------------------
-
-First, we define the cell types, pathways, pathway groups, pathology variables, and assign colors to pathology variables.
-
-.. code-block:: r
 
    # Define common variables
    cell_types <- c("Neuron", "Astrocyte", "Microglia", "Oligodendrocyte", "Endothelial")
@@ -97,28 +302,12 @@ First, we define the cell types, pathways, pathway groups, pathology variables, 
       stringsAsFactors = FALSE
    )
 
-   pathology_variables <- c("Alzheimer's disease", "Cancer", "Flu", "ADHD", "Age", "Weight")
+   pathology_variables <- c("AD", "Cancer", "Flu", "ADHD", "Age", "Weight")
 
    # Assign colors to pathology variables
    n_colors <- length(pathology_variables)
    colors <- brewer.pal(n = n_colors, name = "Set1")
-   cat_c_colors <- setNames(colors, pathology_variables)
-
-
-Explanation of Variables:
-
--	**Cell Types**: A list of different cell types involved in the study.
--	**Pathways**: Biological pathways relevant to the cell types.
--	**Pathway Groups**: Categorization of pathways into `Linked`, `UnLinked`, or `Other`.
--	**Pathology Variables**: Medical conditions or variables of interest.
--	**Colors Assignment**: Assigns a unique color to each pathology variable for visualization.
-
-Creating and Plotting Dice Plots
---------------------------------
-
-We finalize the data and plot the dice plot.
-
-.. code-block:: r
+   z_colors <- setNames(colors, pathology_variables)
 
    # Create dummy data
    set.seed(123)
@@ -135,120 +324,22 @@ We finalize the data and plot the dice plot.
    data <- data %>%
       left_join(pathway_groups, by = "Pathway")
    
-   # Use the dice_plot function
-   dice_plot(
+   # Use the dice_plot function with new parameter names
+   p = dice_plot(
       data = data, 
-      cat_a = "CellType", 
-      cat_b = "Pathway", 
-      cat_c = "PathologyVariable", 
+      x = "CellType", 
+      y = "Pathway", 
+      z = "PathologyVariable", 
       group = "Group",
       group_alpha = 0.6,
       title = "Dice Plot with 6 Pathology Variables",
-      cat_c_colors = cat_c_colors, 
+      z_colors = z_colors, 
       custom_theme = theme_minimal(),
       min_dot_size = 2,
       max_dot_size = 4
    )
-Explanation:
 
--	**Data Creation**: Creates a data frame containing all combinations of cell types and pathways.
--	**Assign Pathology Variables**: Randomly assigns one or more pathology variables to each combination.
--	**Merge Groups**: Adds the group information for each pathway.
--	**Plotting**: Calls `dice_plot` to generate and display the dice plot with specified parameters.
-
-
-Example Usage v0.1.1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning:: 
-    Deprecated
-
-Here is a simple example of how to use the ``diceplot`` package using dummy data.
-The example shows a dummy dataframe containing three hypothetical categorical variables: ``CellType``, ``Pathway``, and ``PathologyVariable``.
-The ``Group`` variable is used to assign different colors to the pathways.
-
-.. code-block:: r
-
-   # Load necessary libraries
-   library(diceplot)
-   library(tidyr)
-   library(data.table)
-   library(ggplot2)
-   library(dplyr)
-   library(tibble)
-   library(grid)
-   library(cowplot)
-
-   plot_path = "./"
-
-   # Define the variables and their colors for 3 variables
-   pathology_variables <- c("Stroke", "Cancer", "Flu")
-   cat_c_colors <- c(
-   "Stroke" = "#d5cccd",
-   "Cancer" = "#cb9992",
-   "Flu" = "#ad310f"
-   )
-
-   # Define cell types (cat_a)
-   cell_types <- c("Neuron", "Astrocyte", "Microglia", "Oligodendrocyte", "Endothelial")
-
-   # Define pathways (cat_b) and groups
-   pathways <- c(
-   "Apoptosis", "Inflammation", "Metabolism", "Signal Transduction", "Synaptic Transmission",
-   "Cell Cycle", "DNA Repair", "Protein Synthesis", "Lipid Metabolism", "Neurotransmitter Release"
-   )
-
-   # Assign groups to pathways
-   pathway_groups <- data.frame(
-   Pathway = pathways,
-   Group = c(
-      "Linked", "UnLinked", "Other", "Linked", "UnLinked",
-      "UnLinked", "Other", "Other", "Other", "Linked"
-   ),
-   stringsAsFactors = FALSE
-   )
-
-   # Define group colors
-   group_colors <- c(
-   "Linked" = "#333333",
-   "UnLinked" = "#888888",
-   "Other" = "#DDDDDD"
-   )
-
-   # Create dummy data
-   set.seed(123)
-   data <- expand.grid(CellType = cell_types, Pathway = pathways, stringsAsFactors = FALSE)
-
-   # Assign random pathology variables to each combination
-   data <- data %>%
-   rowwise() %>%
-   mutate(
-      PathologyVariable = list(sample(pathology_variables, size = sample(1:3, 1)))
-   ) %>%
-   unnest(cols = c(PathologyVariable))
-
-   # Merge the group assignments into the data
-   data <- data %>%
-   left_join(pathway_groups, by = c("Pathway" = "Pathway"))
-
-   # Use the dice_plot function
-   dice_plot(data = data, 
-            cat_a = "CellType", 
-            cat_b = "Pathway", 
-            cat_c = "PathologyVariable", 
-            group = "Group",
-            plot_path = plot_path, 
-            output_str = "dice_plot_3_example", 
-            group_alpha = 0.6,
-            title = "Dice Plot with 3 Pathology Variables",
-            cat_c_colors = cat_c_colors, 
-            group_colors = group_colors, 
-            format = ".png",
-            custom_theme = theme_minimal())
-
-This code will generate a dice plot visualizing the relationships between the categorical variables ``CellType``, ``Pathway``, ``PathologyVariable``, and the group variable ``Group``.
-
-Sample Output
+   print(p)
 
 .. figure:: r_plots/dice_plot_3_example_dice_plot.png
    :alt: Sample Dice with 3 categories Plot
@@ -266,91 +357,421 @@ Sample Output
 
    *Figure: A sample dice plots*
 
-Dominoplot
-~~~~~~~~~~
+Example Usage: Domino Plot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For the domino plot function, the following example demonstrates how to use the function with custom parameters.
-We  will check the gene expression data for different cell types and contrasts.
-
-Example Usage
--------------
-The sample code is examing dummy data for three genes, three cell types, and two contrasts.
-The contrasts are defined as ``Type1`` and ``Type2`` with three and four variables, respectively.
+Here is an example demonstrating how to use the `DicePlot` package to create a domino plot.
 
 .. code-block:: r
 
    # Load necessary libraries
    library(diceplot)
    library(dplyr)
-   library(ggplot2)
    library(tidyr)
+   library(ggplot2)
 
-   # Define genes
-   gene_list <- c("GeneA", "GeneB", "GeneC")
+   # Load dataset
+   zebra.df = read.csv(file = "data/ZEBRA_sex_degs_set.csv")
 
-   # Define cell types
-   cell_types <- c("Neuron", "Astrocyte", "Microglia")
+   genes = c("SPP1","APOE","SERPINA1","PINK1","ANGPT1","ANGPT2","APP","CLU","ABCA7")
+   zebra.df <- zebra.df %>% filter(gene %in% genes) %>%
+     filter(contrast %in% c("MS-CT","AD-CT","ASD-CT","FTD-CT","HD-CT")) %>%
+     mutate(cell_type = factor(cell_type, levels = sort(unique(cell_type)))) %>%
+     filter(PValue < 0.05)
 
-   # Define Contrasts
-   contrasts <- c("Type1", "Type2")  # Changed for demonstration
-
-   # Define vars for each Contrast
-   vars_type1 <- c("MCI-NCI", "AD-MCI", "AD-NCI")
-   vars_type2 <- c("Amyloid", "Plaq N", "Tangles", "NFT")
-
-   # Create a data frame with all combinations
-   data <- expand.grid(
-   gene = gene_list,
-   Cell_Type = cell_types,  # Renamed column
-   Group = contrasts,       # Renamed column
-   stringsAsFactors = FALSE
-   )
-
-   # Add the appropriate vars to each Contrast
-   set.seed(123) 
-   data_type1 <- data %>% 
-   filter(Group == "Type1") %>% 
-   mutate(var = sample(vars_type1, n(), replace = TRUE))
-
-   data_type2 <- data %>% 
-   filter(Group == "Type2") %>% 
-   mutate(var = sample(vars_type2, n(), replace = TRUE))
-
-   # Combine the data
-   data <- bind_rows(data_type1, data_type2)
-
-   # Assign random values for logFC and adjusted p-values
-   data <- data %>%
-   mutate(
-      logFC = runif(n(), min = -2, max = 2),  # Renamed column
-      adj_p_value = runif(n(), min = 0.0001, max = 0.05)
-   )
-
-   # call the domino function
-   p <- domino_plot(
-   data = data,
-   gene_list = gene_list,
-   feature_col = "gene",
-   celltype_col = "Cell_Type",
-   contrast_col = "Group",
-   contrast_levels = c("Type1", "Type2"),
-   contrast_labels = c("Type 1", "Type 2"),
-   logfc_col = "logFC",
-   pval_col = "adj_p_value",
-   switch_axis = FALSE,
-   min_dot_size = 1,
-   max_dot_size = 5,
-   output_file = "domino_plot_example.png"
+   # Create a basic domino plot
+   p_basic <- domino_plot(
+     data = zebra.df,      # Input data
+     gene_list = genes,    # List of genes to include
+     var_id = "contrast",  # Variable that identifies different conditions
+     x = "gene",           # Variable for x-axis
+     y = "cell_type",      # Variable for y-axis
+     contrast = "sex",     # Contrast variable (e.g., male vs female)
+     log_fc = "logFC",     # Column name for log fold change
+     p_val = "FDR"         # Column name for p-values
    )
 
    # Display the plot
-   print(p)
-
-
-
-Sample Output
+   print(p_basic)
 
 .. figure:: r_plots/joined_domino_plot_example.png
    :alt: Sample domino plot
+
+Domino Plot Tutorial
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Introduction to Domino Plots
+---------------------------
+
+A **Domino Plot** is a specialized visualization from the DicePlot package that allows you to display differential expression data across multiple categorical variables. It's particularly useful for visualizing how gene expression changes across different cell types, conditions, and contrasts.
+
+The plot uses colors to represent up/down-regulation and size to represent statistical significance. This example uses data from the `ZEBRA <https://ccb-compute.cs.uni-saarland.de/brain_atlas>`_ database, a hierarchically integrated gene expression atlas of the murine and human brain at single-cell resolution.
+
+Prerequisites
+------------
+
+Before starting, ensure you have the following packages installed:
+
+.. code-block:: r
+
+   install.packages(c("dplyr", "tidyr", "ggplot2", "diceplot"))
+
+Dataset Overview
+---------------
+
+For this tutorial, we'll use a dataset derived from human cortex samples that contains differential expression analysis results comparing gene expression between sexes across various neurological conditions. The dataset includes:
+
+- **gene**: Gene symbols
+- **cell_type**: Different cell types in the brain
+- **contrast**: Different disease conditions compared to control (e.g., "MS-CT" compares Multiple Sclerosis to Control)
+- **sex**: The contrast variable (male vs female)
+- **logFC**: Log fold change values
+- **PValue** and **FDR**: Statistical significance measures
+
+Step 1: Load Required Libraries
+------------------------------
+
+.. code-block:: r
+
+   library(dplyr)
+   library(tidyr)
+   library(ggplot2)
+   library(diceplot)
+
+Step 2: Load and Prepare the Data
+--------------------------------
+
+.. code-block:: r
+
+   # Load dataset
+   zebra.df = read.csv(file = "data/ZEBRA_sex_degs_set.csv")
+
+   genes = c("SPP1","APOE","SERPINA1","PINK1","ANGPT1","ANGPT2","APP","CLU","ABCA7")
+   zebra.df <- zebra.df %>% filter(gene %in% genes) %>%
+     filter(contrast %in% c("MS-CT","AD-CT","ASD-CT","FTD-CT","HD-CT")) %>%
+     mutate(cell_type = factor(cell_type, levels = sort(unique(cell_type)))) %>%
+     filter(PValue < 0.05)
+
+Step 3: Create a Basic Domino Plot
+---------------------------------
+
+.. code-block:: r
+
+   p_basic <- domino_plot(
+     data = zebra.df,      # Input data
+     gene_list = genes,    # List of genes to include
+     var_id = "contrast",  # Variable that identifies different conditions
+     x = "gene",           # Variable for x-axis
+     y = "cell_type",      # Variable for y-axis
+     contrast = "sex",     # Contrast variable (e.g., male vs female)
+     log_fc = "logFC",     # Column name for log fold change
+     p_val = "FDR"         # Column name for p-values
+   )
+
+   # Display the plot
+   print(p_basic)
+
+Step 4: Create a Customized Domino Plot
+--------------------------------------
+
+.. code-block:: r
+
+   p_advanced <- domino_plot(
+     data = zebra.df,
+     gene_list = genes,
+     var_id = "contrast",
+     x = "gene",
+     y = "cell_type",
+     contrast = "sex",
+     log_fc = "logFC",
+     p_val = "FDR",
+     min_dot_size = 1,     # Minimum dot size for least significant results
+     max_dot_size = 3,     # Maximum dot size for most significant results
+     logfc_limits = c(min(zebra.df$logFC)-1, max(zebra.df$logFC)-1)  # Custom logFC color scale limits
+   )
+
+   # Display the plot
+   print(p_advanced$domino_plot)
+
+Step 5: Further Customizing the Plot
+-----------------------------------
+
+.. code-block:: r
+
+   p_custom <- p_advanced$domino_plot + 
+     theme_minimal() +
+     theme(
+       axis.text.x = element_text(angle = 45, hjust = 1),
+       plot.title = element_text(hjust = 0.5, size = 14),
+       legend.position = "bottom"
+     ) +
+     labs(title = "Differential Expression Across Cell Types and Conditions")
+
+   # Display the customized plot
+   print(p_custom)
+
+   # Save the plot
+   ggsave("domino_plot_example.png", p_custom, width = 10, height = 8, dpi = 300)
+
+Step 6: Creating a Faceted Domino Plot
+-------------------------------------
+
+.. code-block:: r
+
+   p_faceted <- domino_plot(
+     data = zebra.df,
+     gene_list = genes,
+     var_id = "contrast",
+     x = "gene",
+     y = "cell_type",
+     contrast = "sex",
+     log_fc = "logFC",
+     p_val = "FDR",
+     min_dot_size = 1,
+     max_dot_size = 3
+   )$domino_plot +
+     facet_wrap(~contrast, scales = "free_y") +
+     theme(
+       strip.background = element_rect(fill = "lightgray"),
+       strip.text = element_text(face = "bold")
+     )
+
+   # Display the faceted plot
+   print(p_faceted)
+
+   # Save the faceted plot
+   ggsave("domino_plot_faceted.png", p_faceted, width = 14, height = 10, dpi = 300)
+
+.. figure:: r_plots/ZEBRA_example1.png
+   :alt: ZEBRA Example Domino Plot
+
+Understanding the Domino Plot Output
+-----------------------------------
+
+In a domino plot:
+
+- **Color**: Represents the direction and magnitude of change
+  - Red typically indicates upregulation (positive logFC)
+  - Blue typically indicates downregulation (negative logFC)
+  - The intensity of color represents the magnitude of change
+
+- **Size**: Represents statistical significance
+  - Larger dots indicate more statistically significant results (smaller p-values)
+  - Smaller dots indicate less statistically significant results (larger p-values)
+
+- **Position**: Shows the combination of categorical variables
+  - x-axis: Typically genes
+  - y-axis: Typically cell types
+  - Facets (if used): Can represent different conditions or contrasts
+
+geom_dice_sf Tutorial
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Prerequisites
+------------
+
+This tutorial has prerequisites which are not defaults in the diceplot package itself.
+Before proceeding, install the required R packages:
+
+.. code-block:: r
+
+   install.packages(c("sf", "ggplot2", "diceplot", "dplyr", "cowplot", "rnaturalearth"))
+
+Dataset Overview
+---------------
+
+We use a dataset containing city locations in Saarland, along with their log-transformed distances to France, Switzerland, Luxembourg, and Rheinland-Pfalz.
+
+- **name**: City name
+- **lon/lat**: Geographical coordinates
+- **dice**: Number of dice dots (fixed at 4)
+- **log_France, log_Swiss, log_Luxembourg, log_Rheinlandpfalz**: Log-transformed distances to respective regions
+
+Step 1: Load Required Libraries
+------------------------------
+
+.. code-block:: r
+
+   library(sf)
+   library(ggplot2)
+   library(diceplot)
+   library(dplyr)
+   library(cowplot)
+   library(rnaturalearth)
+
+Step 2: Load and Prepare the Data
+--------------------------------
+
+.. code-block:: r
+
+   # Define custom dice face positions
+   var_positions <- data.frame(
+     x_offset = c(-0.3, 0.3, -0.3, 0.3),
+     y_offset = c(0.3, 0.3, -0.3, -0.3),
+     var = c("log_France", "log_Swiss", "log_Luxembourg", "log_Rheinlandpfalz")
+   )
+
+   # Load Germany state boundaries
+   germany_states <- ne_states(country = "Germany", returnclass = "sf")
+   saarland <- germany_states[germany_states$name == "Saarland", ]
+
+   # Define city locations and distances
+   cities <- data.frame(
+     name = c("Saarbrücken", "Saarlouis", "Homburg", "Britten", "Merzig", "Lebach", "Ottweiler"),
+     dice = 4,
+     lon = c(6.996, 6.751, 7.339, 6.784, 6.639, 6.913, 7.167),
+     lat = c(49.234, 49.315, 49.320, 49.481, 49.442, 49.407, 49.400),
+     France = c(14, 12, 38, 27, 18, 27, 36),
+     Swiss = c(190, 204, 195, 221, 220, 210, 206),
+     Luxembourg = c(51, 31, 67, 23, 17, 35, 52),
+     Rheinlandpfalz = c(29, 27, 6, 16, 20, 12, 16)
+   )
+
+   # Convert to spatial object
+   cities_sf <- st_as_sf(cities, coords = c("lon", "lat"), crs = 4326)
+   cities_sf$log_France <- log(cities_sf$France)
+   cities_sf$log_Swiss <- log(cities_sf$Swiss)
+   cities_sf$log_Luxembourg <- log(cities_sf$Luxembourg)
+   cities_sf$log_Rheinlandpfalz <- log(cities_sf$Rheinlandpfalz)
+
+Step 3: Create a Custom Legend Function
+-------------------------------------
+
+.. code-block:: r
+
+   create_custom_legends_for_map <- function(var_positions, dot_size, legend_text_size = 9) {
+     legend_data <- var_positions %>% mutate(x = x_offset + 1, y = y_offset + 1)
+     ggplot() +
+       geom_point(data = legend_data, aes(x = x, y = y), size = dot_size, color = "black") +
+       geom_point(data = legend_data, aes(x = x, y = y), size = dot_size + 0.5, shape = 1, color = "black") +
+       coord_fixed(ratio = 1, xlim = c(0.5, 2.5), ylim = c(0.5, 1.5), expand = FALSE) +
+       geom_text(
+         data = legend_data,
+         aes(
+           x = ifelse(x > 0, x + 0.15, x - 0.15),
+           y = ifelse(y > 0, y + 0.15, y - 0.15),
+           label = var,
+           hjust = ifelse(x < 0, 1, 0),
+           vjust = ifelse(y > 0, 0, 1)
+         ),
+         size = legend_text_size / 3, color = "black"
+       ) +
+       ggtitle("Dice arrangement") +
+       theme_void()
+   }
+
+Step 4: Create a map with geom_dice_sf
+-------------------------------------
+
+.. code-block:: r
+
+   # Generate legend plot
+   legend_plot <- create_custom_legends_for_map(var_positions, dot_size = 3)
+
+   # Generate main dice plot
+   main_plot <- ggplot() +
+     geom_sf(data = saarland, fill = "lightblue", color = "black") +
+     geom_dice_sf(
+       sf_data = cities_sf,
+       dice_value_col = "dice",
+       face_color = c("log_France", "log_Swiss", "log_Luxembourg", "log_Rheinlandpfalz"),
+       dice_size = 0.5,
+       dot_size = 3
+     ) +
+     geom_text(
+       data = cities_sf,
+       mapping = aes(x = st_coordinates(cities_sf)[,1],
+                     y = st_coordinates(cities_sf)[,2],
+                     label = name),
+       nudge_y = 0.03, size = 3
+     ) +
+     ggtitle("Saarland with Dice Markers Showing Log-Scaled Distances to Borders") +
+     theme_minimal()
+
+   # Combine main plot and legend
+   final_plot <- plot_grid(main_plot, legend_plot, ncol = 2, rel_widths = c(4, 1))
+
+   # Display the final plot
+   final_plot
+
+.. figure:: r_plots/saarland_geom_dice_sf.png
+   :alt: Saarland geom_dice_sf Example
+
+Python Integration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For using dice plots in Python, please refer to `pyDicePlot <https://github.com/maflot/pyDicePlot/tree/main>`_.
+
+Documentation
+~~~~~~~~~~~~
+
+For full documentation and additional examples, please refer to the `documentation <https://dice-and-domino-plot.readthedocs.io/en/latest/index.html#>`_.
+
+Features
+~~~~~~~~
+
+- **Visualize Complex Data:** Easily create plots for datasets with multiple categorical variables.
+- **Customization:** Customize plots with titles, labels, and themes.
+- **Integration with ggplot2:** Leverages the power of `ggplot2` for advanced plotting capabilities.
+
+Contributing
+~~~~~~~~~~~
+
+We welcome contributions from the community! If you'd like to contribute:
+
+1. Fork the repository on GitHub.
+2. Create a new branch for your feature or bug fix.
+3. Submit a pull request with a detailed description of your changes.
+
+Contact
+~~~~~~~
+
+If you have any questions, suggestions, or issues, please open an issue on GitHub.
+
+Change Log v0.1.7
+~~~~~~~~~~~~~~~~
+
+- Update the examples to real world data
+- move example files out of test to example
+
+geom_dice_sf
+-----------
+
+- add prototype for geom_dice_sf function
+- see examples/geom_dice_sf_test2.R
+
+domino_plot function
+-------------------
+
+- Add proper legend to the plot, remove intermediate plot
+- Default logfc crop to NULL
+
+Citation
+~~~~~~~~
+
+If you use this code or the R and Python packages for your own work, please cite diceplot as:
+
+> M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arxiv, 2024. `doi:10.48550/arXiv.2410.23897 <https://doi.org/10.48550/arXiv.2410.23897>`_
+
+BibTeX entry:
+
+.. code-block:: bibtex
+
+   @article{flotea2024,
+       author = {Flotho, M. and Flotho, P. and Keller, A.},
+       title = {Diceplot: A package for high dimensional categorical data visualization},
+       year = {2024},
+       journal = {arXiv preprint},
+       doi = {https://doi.org/10.48550/arXiv.2410.23897}
+   }
+
+References
+~~~~~~~~~
+
+[1] Flotho, M., Flotho, P., Keller, A. (2024). Diceplot: A package for high dimensional categorical data visualization. *arXiv preprint*. https://doi.org/10.48550/arXiv.2410.23897
+
+[2] Flotho, M., Amand, J., Hirsch, P., Grandke, F., Wyss-Coray, T., Keller, A., Kern, F. (2023). ZEBRA: a hierarchically integrated gene expression atlas of the murine and human brain at single-cell resolution. *Nucleic Acids Research*, 52(D1), D1089-D1096. https://doi.org/10.1093/nar/gkad990
+
+[3] Huang, Z., Chen, B., Liu, X., Li, H., Xie, L., Gao, Y., Duan, R., Li, Z., Zhang, J., Zheng, Y., et al. (2021). Effects of sex and aging on the immune cell landscape as assessed by single-cell transcriptomic analysis. *Proceedings of the National Academy of Sciences*, 118(33), e2023216118. https://doi.org/10.1073/pnas.2023216118
 
 
