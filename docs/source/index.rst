@@ -83,7 +83,7 @@ Citation
 
 If you use this code or the R and Python packages for your own work, please cite DicePlot as:
 
-**M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arxiv, 2024.**
+**M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arXiv, 2024.**
 *doi:10.48550/arXiv.2410.23897*  
 <https://doi.org/10.48550/arXiv.2410.23897>
 
@@ -91,7 +91,7 @@ BibTeX entry:
 
 .. code-block:: bibtex
 
-    @article{flotea2024,
+    @article{flotho2024,
         author = {Flotho, M. and Flotho, P. and Keller, A.},
         title = {Diceplot: A package for high dimensional categorical data visualization},
         year = {2024},
