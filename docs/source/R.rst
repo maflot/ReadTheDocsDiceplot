@@ -1,5 +1,5 @@
-R - DicePlot
-=======================
+R - DicePlot (Legacy)
+=====================
 
 .. image:: https://www.r-pkg.org/badges/version/diceplot
     :target: https://CRAN.R-project.org/package=diceplot
@@ -9,13 +9,32 @@ R - DicePlot
     :target: https://CRAN.R-project.org/package=diceplot
     :alt: CRAN Downloads
 
+.. important::
+    **R users should use the ggdiceplot package instead!**
+    
+    If you are working in R, please consider using the `ggdiceplot <https://github.com/maflot/ggdiceplot>`_ package instead. 
+    ggdiceplot is a fully ggplot2-native implementation that offers more flexibility, better integration with the ggplot2 ecosystem, 
+    and additional features. See the :doc:`ggdiceplot` chapter for modern R usage.
+    
+    DicePlot remains available on CRAN for compatibility with existing projects, but is no longer the primary R interface.
+
 .. note::
-    This repository is in active development
+    This repository is maintained for backwards compatibility
 
 The **DicePlot** package allows you to create visualizations (dice plots) for datasets with more than two categorical variables and additional continuous variables. This tool is particularly useful for exploring complex categorical data and their relationships with continuous variables.
 
 Requirements and installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. important::
+    **Before installing DicePlot, consider ggdiceplot!**
+    
+    For new R projects, we strongly recommend using `ggdiceplot <https://github.com/maflot/ggdiceplot>`_ 
+    instead. ggdiceplot is the preferred R interface with full ggplot2 integration. 
+    Install it with: ``devtools::install_github("maflot/ggdiceplot")``
+    
+    The instructions below are for the legacy DicePlot package, which remains available 
+    on CRAN if needed for compatibility with existing code.
 
 1. Install R
 ------------
@@ -78,6 +97,13 @@ After installation, load the ``DicePlot`` package into your R session:
 
 Diceplot: Tutorial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. tip::
+    **For a fully ggplot2-compatible workflow, use ggdiceplot!**
+    
+    The examples below use the legacy DicePlot package. For modern R development, 
+    we recommend using `ggdiceplot <https://github.com/maflot/ggdiceplot>`_ which provides 
+    the same functionality with native ggplot2 integration. See :doc:`ggdiceplot` for details.
 
 Real-World Example
 -------------------
@@ -358,6 +384,13 @@ For additional examples, please refer to the `tests/` folder.
 Domino Plot Tutorial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. tip::
+    **ggdiceplot provides a more flexible domino plot implementation!**
+    
+    While the examples below demonstrate the legacy DicePlot domino_plot function, 
+    the ggdiceplot package offers domino plots with full ggplot2 customization. 
+    See the :doc:`ggdiceplot` chapter for the modern approach using ``geom_dice()``.
+
 Introduction to Domino Plots
 ---------------------------
 
@@ -524,6 +557,13 @@ In a domino plot:
 
 geom_dice_sf Tutorial
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. tip::
+    **Spatial visualization with ggdiceplot**
+    
+    The ``geom_dice_sf`` functionality shown below is also available in ggdiceplot 
+    with enhanced ggplot2 integration. For new projects, consider using 
+    `ggdiceplot <https://github.com/maflot/ggdiceplot>`_ for spatial dice plots.
 
 Prerequisites
 ------------
