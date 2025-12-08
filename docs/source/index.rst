@@ -9,6 +9,12 @@ DicePlot: a package for high dimensional categorical data visualization
     :target: https://pypi.org/project/pydiceplot/
     :alt: PyPI Status Badge
 
+.. important::
+   **Note for R users:** We recommend using the newer `ggdiceplot <https://github.com/maflot/ggdiceplot>`_ package for R. 
+   ggdiceplot is fully ggplot2-native, offering more flexibility, additional features, and better integration with the ggplot2 ecosystem. 
+   DicePlot remains available for compatibility but is no longer the primary R interface. 
+   See the :doc:`ggdiceplot` chapter for details.
+
 .. note::
    This project is under active development.
 
@@ -34,15 +40,22 @@ Features
 
 
 
-DicePlot
---------
-You can find the `R Source Code <https://github.com/maflot/DicePlot>`_ on github.
+ggdiceplot (Recommended for R)
+--------------------------------
+The modern, ggplot2-native implementation for R users. You can find the `ggdiceplot Source Code <https://github.com/maflot/ggdiceplot>`_ on github.
+
+.. toctree::
+   ggdiceplot
+
+DicePlot (R - Legacy)
+---------------------
+The original R implementation, maintained for compatibility. You can find the `R Source Code <https://github.com/maflot/DicePlot>`_ on github.
 
 .. toctree::
    R
 
 pyDicePlot
---------
+----------
 You can find the `python Source Code <https://github.com/maflot/pyDicePlot/tree/main>`_ on github.
 
 .. toctree::
@@ -70,7 +83,7 @@ Citation
 
 If you use this code or the R and Python packages for your own work, please cite DicePlot as:
 
-**M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arxiv, 2024.**
+**M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arXiv, 2024.**
 *doi:10.48550/arXiv.2410.23897*  
 <https://doi.org/10.48550/arXiv.2410.23897>
 
@@ -78,7 +91,7 @@ BibTeX entry:
 
 .. code-block:: bibtex
 
-    @article{flotea2024,
+    @article{flotho2024,
         author = {Flotho, M. and Flotho, P. and Keller, A.},
         title = {Diceplot: A package for high dimensional categorical data visualization},
         year = {2024},
