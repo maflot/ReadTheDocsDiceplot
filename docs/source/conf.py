@@ -6,8 +6,8 @@ project = 'DicePlot'
 copyright = '2024, CCB - https://www.ccb.uni-saarland.de/'
 author = 'Matthias Flotho'
 
-release = '0.1'
-version = '0.1.0'
+release = '1.0'
+version = '1.0.0'
 
 # -- General configuration
 

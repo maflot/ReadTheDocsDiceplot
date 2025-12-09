@@ -1,8 +1,8 @@
 DicePlot: a package for high dimensional categorical data visualization
 ========================================================================
 
-.. image:: https://www.r-pkg.org/badges/version/diceplot
-    :target: https://CRAN.R-project.org/package=diceplot
+.. image:: https://www.r-pkg.org/badges/version/ggdiceplot
+    :target: https://CRAN.R-project.org/package=ggdiceplot
     :alt: CRAN Status Badge
 
 .. image:: https://badge.fury.io/py/pydiceplot.svg
@@ -44,14 +44,15 @@ ggdiceplot (Recommended for R)
 --------------------------------
 The modern, ggplot2-native implementation for R users. You can find the `ggdiceplot Source Code <https://github.com/maflot/ggdiceplot>`_ on github.
 
+For users who still rely on the original DicePlot R package, a
+:doc:`legacy R implementation <R>` remains available.
+
 .. toctree::
    ggdiceplot
 
-DicePlot (R - Legacy)
----------------------
-The original R implementation, maintained for compatibility. You can find the `R Source Code <https://github.com/maflot/DicePlot>`_ on github.
-
 .. toctree::
+   :hidden:
+
    R
 
 pyDicePlot
@@ -79,22 +80,21 @@ If you have any questions, suggestions, or issues, please open an issue on GitHu
 
 
 Citation
-~~~~~~~~~~~~~~~~~~~
+--------
 
-If you use this code or the R and Python packages for your own work, please cite DicePlot as:
+If you use ggdiceplot in your research, please cite:
 
-**M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arXiv, 2024.**
-*doi:10.48550/arXiv.2410.23897*  
-<https://doi.org/10.48550/arXiv.2410.23897>
-
-BibTeX entry:
+**Matthias Flotho, Philipp Flotho, Andreas Keller, DicePlot: A package for high dimensional categorical data visualization, Bioinformatics, 2025;, btaf337, https://doi.org/10.1093/bioinformatics/btaf337**
+*doi.org/10.1093/bioinformatics/btaf337*  
+`https://doi.org/10.1093/bioinformatics/btaf337 <https://doi.org/10.1093/bioinformatics/btaf337>`_
 
 .. code-block:: bibtex
 
-    @article{flotho2024,
-        author = {Flotho, M. and Flotho, P. and Keller, A.},
-        title = {Diceplot: A package for high dimensional categorical data visualization},
-        year = {2024},
-        journal = {arXiv preprint},
-        doi = {https://doi.org/10.48550/arXiv.2410.23897}
+    @article{flotho2025diceplot,
+      title={DicePlot: A package for high dimensional categorical data visualization},
+      author={Flotho, Matthias and Flotho, Philipp and Keller, Andreas},
+      journal={Bioinformatics},
+      pages={btaf337},
+      year={2025},
+      publisher={Oxford University Press}
     }

@@ -1,5 +1,13 @@
-Using ggdiceplot: The Recommended R Implementation
+ggdiceplot: The Recommended R Implementation
 ===================================================
+
+.. image:: https://www.r-pkg.org/badges/version/ggdiceplot
+    :target: https://CRAN.R-project.org/package=ggdiceplot
+    :alt: CRAN Status Badge
+
+.. image:: https://cranlogs.r-pkg.org/badges/grand-total/ggdiceplot
+    :target: https://CRAN.R-project.org/package=ggdiceplot
+    :alt: CRAN Downloads
 
 .. important::
    **ggdiceplot is now the preferred R package for creating dice plots and domino plots.**
@@ -447,21 +455,3 @@ We welcome contributions to ggdiceplot! If you'd like to contribute:
 3. Write tests for your changes
 4. Submit a pull request with a clear description
 
-Citation
---------
-
-If you use ggdiceplot in your research, please cite:
-
-**M. Flotho, P. Flotho, A. Keller, "Diceplot: A package for high dimensional categorical data visualization," arXiv, 2024.**
-*doi:10.48550/arXiv.2410.23897*  
-`https://doi.org/10.48550/arXiv.2410.23897 <https://doi.org/10.48550/arXiv.2410.23897>`_
-
-.. code-block:: bibtex
-
-    @article{flotho2024,
-        author = {Flotho, M. and Flotho, P. and Keller, A.},
-        title = {Diceplot: A package for high dimensional categorical data visualization},
-        year = {2024},
-        journal = {arXiv preprint},
-        doi = {https://doi.org/10.48550/arXiv.2410.23897}
-    }
