@@ -21,6 +21,18 @@ Overview
 
 The package is available on GitHub: `https://github.com/maflot/ggdiceplot <https://github.com/maflot/ggdiceplot>`_
 
+What's New in v1.2.0
+--------------------
+
+.. note::
+   ggdiceplot **1.2.0** is the latest release. It includes important bug fixes for ggplot2 >= 4.0 compatibility.
+
+**Bug fixes**
+
+- **Fixed dice not rendering with ggplot2 >= 4.0** — The ``drawDetails.DiceGrob`` S3 method was not registered in the package NAMESPACE, so grid never dispatched to the custom drawing code. Neither tiles nor pips were drawn. Fixed by adding ``S3method(grid::drawDetails, DiceGrob)`` to NAMESPACE via ``@exportS3Method``.
+
+- **Fixed invisible pips when** ``fill`` **is not mapped** — When the ``fill`` aesthetic was not mapped (default ``NA``), pip colour was also set to ``NA``, making pips invisible. Pips now default to black when ``fill`` is unmapped.
+
 Why ggdiceplot Should Be Preferred Over DicePlot
 -------------------------------------------------
 
@@ -69,13 +81,19 @@ Key Differences Between DicePlot and ggdiceplot
 Installation
 ------------
 
-Install ggdiceplot directly from GitHub using devtools or remotes:
+Install ggdiceplot from CRAN:
+
+.. code-block:: r
+
+   install.packages("ggdiceplot")
+
+Or install the development version directly from GitHub using devtools or remotes:
 
 .. code-block:: r
 
    # Install devtools if you haven't already
    install.packages("devtools")
-   
+
    # Install ggdiceplot from GitHub
    devtools::install_github("maflot/ggdiceplot")
 
@@ -85,7 +103,7 @@ Or using remotes:
 
    # Install remotes if you haven't already
    install.packages("remotes")
-   
+
    # Install ggdiceplot from GitHub
    remotes::install_github("maflot/ggdiceplot")
 
@@ -98,7 +116,74 @@ After installation, load ggdiceplot into your R session:
 
    library(ggdiceplot)
    library(ggplot2)  # ggdiceplot extends ggplot2
-   library(dplyr)    # useful for data manipulation
+
+Key Parameters
+--------------
+
+``geom_dice()`` accepts the following key arguments:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 15 65
+
+   * - Parameter
+     - Default
+     - Description
+   * - ``dots``
+     - (required)
+     - Aesthetic mapping — the categorical variable whose levels occupy dice pip positions (1–6).
+   * - ``fill``
+     - ``NA``
+     - Aesthetic mapping — fill colour for pips. Defaults to black when unmapped.
+   * - ``size``
+     - constant
+     - Aesthetic mapping — pip size. When mapped to a variable, pips scale between 25% and ``pip_scale`` of the maximum pip diameter.
+   * - ``width``, ``height``
+     - ``0.9``
+     - Aesthetics controlling the tile dimensions (passed inside ``aes()``).
+   * - ``ndots``
+     - ``NULL``
+     - Integer (1–6): number of pip positions shown per die. Should equal ``length(unique(data$dots_var))``.
+   * - ``x_length``
+     - ``NULL``
+     - Number of unique x categories (used for aspect ratio and coord scaling).
+   * - ``y_length``
+     - ``NULL``
+     - Number of unique y categories (used for aspect ratio and coord scaling).
+   * - ``pip_scale``
+     - ``0.75``
+     - Pip diameter as a fraction (0–1) of the maximum available space inside each tile. Set to ``NULL`` to disable auto-scaling and use the raw ``size`` aesthetic (legacy behaviour).
+   * - ``na.rm``
+     - ``FALSE``
+     - If ``TRUE``, silently remove rows with missing ``size`` or ``fill`` values.
+
+Key Functions
+-------------
+
+- ``geom_dice()``: Main geom for creating dice plots with automatic 1:1 aspect ratio.
+- ``theme_dice()``: Minimal theme optimised for dice plots.
+- ``create_dice_positions()``: Generate standard dice dot position layouts (used internally for legends).
+- ``make_offsets()``: Calculate pip positions for rendering.
+
+Built-in Datasets
+-----------------
+
+ggdiceplot ships four sample datasets:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Dataset
+     - Description
+   * - ``sample_dice_data1``
+     - 160 rows (8 taxa × 4 diseases × 5 specimens). Contains ``lfc`` and ``q`` columns that may be ``NA``.
+   * - ``sample_dice_data2``
+     - 160 rows; same structure as ``sample_dice_data1`` without a ``replicate`` column.
+   * - ``sample_dice_miRNA``
+     - ~90 rows of miRNA dysregulation data (miRNA × Compound × Organ) with a ``direction`` column (Up / Down / Unchanged).
+   * - ``sample_dice_large``
+     - 480 rows (60 taxa) for demonstrating high-density dice plots.
 
 Basic Example Using geom_dice()
 --------------------------------
@@ -109,194 +194,172 @@ Here's a simple example demonstrating the ggplot2-native workflow with ``geom_di
 
    library(ggdiceplot)
    library(ggplot2)
-   library(dplyr)
 
-   # Create sample data
-   data <- expand.grid(
-     x = LETTERS[1:5],
-     y = 1:5
-   ) %>%
-     mutate(
-       category1 = sample(c("Type1", "Type2", "Type3"), n(), replace = TRUE),
-       category2 = sample(c("A", "B", "C"), n(), replace = TRUE),
-       value = runif(n())
-     )
+   df <- data.frame(
+     x    = 1:3,
+     y    = 1,
+     dots = c("A,B", "A,C,E", "F")
+   )
 
-   # Create a dice plot using ggplot2 syntax
-   ggplot(data, aes(x = x, y = y)) +
-     geom_dice(aes(fill = category1, color = category2), 
-               dice_size = 0.8) +
-     scale_fill_viridis_d() +
-     theme_minimal() +
-     labs(title = "Simple Dice Plot with ggdiceplot",
-          x = "X Category",
-          y = "Y Category")
+   ggplot(df, aes(x, y, dots = dots)) +
+     geom_dice(ndots = 6, x_length = 3, y_length = 1) +
+     labs(title = "Minimal Dice Plot")
 
-Advanced Example: Gene Expression Patterns
--------------------------------------------
+Taxonomy Example
+----------------
 
-This example demonstrates how to visualize complex gene expression data across multiple cell types and conditions:
+This example uses the built-in ``sample_dice_data2`` dataset:
 
 .. code-block:: r
 
-   library(ggdiceplot)
    library(ggplot2)
+   library(ggdiceplot)
+
+   data("sample_dice_data2", package = "ggdiceplot")
+   toy_data <- sample_dice_data2
+
+   lo      <- floor(min(toy_data$lfc, na.rm = TRUE))
+   up      <- ceiling(max(toy_data$lfc, na.rm = TRUE))
+   mid     <- (lo + up) / 2
+   minsize <- floor(min(-log10(toy_data$q), na.rm = TRUE))
+   maxsize <- ceiling(max(-log10(toy_data$q), na.rm = TRUE))
+   midsize <- ceiling(quantile(-log10(toy_data$q), 0.5, na.rm = TRUE))
+
+   ggplot(toy_data, aes(x = specimen, y = taxon)) +
+     geom_dice(
+       aes(dots = disease, fill = lfc, size = -log10(q),
+           width = 0.9, height = 0.9),
+       na.rm       = TRUE,
+       show.legend = TRUE,
+       pip_scale   = 0.9,
+       ndots       = length(unique(toy_data$disease)),
+       x_length    = length(unique(toy_data$specimen)),
+       y_length    = length(unique(toy_data$taxon))
+     ) +
+     scale_fill_gradient2(
+       low = "#40004B", high = "#00441B", mid = "white",
+       na.value = "white", limit = c(lo, up), midpoint = mid,
+       name = "Log2FC"
+     ) +
+     scale_size_continuous(
+       range  = c(2, 8),
+       limits = c(minsize, maxsize),
+       breaks = c(minsize, midsize, maxsize),
+       labels = c(10^-minsize, 10^-midsize, 10^-maxsize),
+       name   = "q-value"
+     )
+
+miRNA Dysregulation Example
+----------------------------
+
+This example uses the built-in ``sample_dice_miRNA`` dataset:
+
+.. code-block:: r
+
+   library(ggplot2)
+   library(ggdiceplot)
+
+   data("sample_dice_miRNA", package = "ggdiceplot")
+   df_dice <- sample_dice_miRNA
+
+   direction_colors <- c(Down = "#2166ac", Unchanged = "grey80", Up = "#b2182b")
+
+   ggplot(df_dice, aes(x = miRNA, y = Compound)) +
+     geom_dice(
+       aes(dots = Organ, fill = direction, width = 0.8, height = 0.8),
+       show.legend = TRUE,
+       pip_scale   = 1.0,
+       ndots       = length(levels(df_dice$Organ)),
+       x_length    = length(levels(df_dice$miRNA)),
+       y_length    = length(levels(df_dice$Compound))
+     ) +
+     scale_fill_manual(values = direction_colors, name = "Regulation") +
+     theme_dice() +
+     theme(
+       axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 0.5),
+       axis.text.y = element_text(hjust = 1),
+       panel.grid  = element_blank()
+     ) +
+     labs(
+       title = "DicePlot: log2FC direction per miRNA, compound and organ",
+       x     = "miRNA",
+       y     = "Compound"
+     )
+
+Domino Plot Example (Gene Expression)
+--------------------------------------
+
+Domino plots visualise differential expression data across multiple conditions and cell types. Use ``geom_dice()`` with a ``dots`` aesthetic mapped to the contrast variable. The example below uses simulated data; substitute your own data frame with the same column structure:
+
+.. code-block:: r
+
+   library(ggplot2)
+   library(ggdiceplot)
    library(dplyr)
    library(tidyr)
 
-   # Simulate gene expression data
-   set.seed(123)
-   gene_data <- expand.grid(
-     gene = paste0("Gene", 1:10),
-     cell_type = c("Neuron", "Astrocyte", "Microglia", "Oligodendrocyte"),
-     condition = c("Control", "Treatment")
-   ) %>%
-     mutate(
-       expression = rnorm(n(), mean = 5, sd = 2),
-       significance = sample(c("NS", "p<0.05", "p<0.01"), n(), replace = TRUE,
-                            prob = c(0.6, 0.3, 0.1))
-     )
-
-   # Create dice plot with faceting
-   ggplot(gene_data, aes(x = gene, y = cell_type)) +
-     geom_dice(aes(fill = expression, size = significance),
-               dice_size = 0.9) +
-     facet_wrap(~condition) +
-     scale_fill_gradient2(low = "blue", mid = "white", high = "red",
-                         midpoint = 5, name = "Expression") +
-     scale_size_manual(values = c("NS" = 1, "p<0.05" = 2, "p<0.01" = 3),
-                      name = "Significance") +
-     theme_bw() +
-     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-     labs(title = "Gene Expression Across Cell Types",
-          subtitle = "Comparison of Control vs Treatment conditions",
-          x = "Gene", y = "Cell Type")
-
-Domino Plot Example Using geom_dice()
---------------------------------------
-
-Domino plots are useful for visualizing differential expression data. Here's how to create them with ggdiceplot:
-
-.. code-block:: r
-
-   library(ggdiceplot)
-   library(ggplot2)
-   library(dplyr)
-
    # Simulate differential expression data
-   set.seed(456)
+   set.seed(42)
+   genes      <- c("SPP1", "APOE", "SERPINA1", "PINK1", "ANGPT1", "CLU")
+   cell_types <- c("Neuron", "Astrocyte", "Microglia", "Oligodendrocyte")
+   contrasts  <- c("MS-CT", "AD-CT", "ASD-CT", "FTD-CT", "HD-CT")
+
    de_data <- expand.grid(
-     gene = paste0("Gene", 1:15),
-     cell_type = c("T cell", "B cell", "NK cell", "Monocyte")
+     gene      = factor(genes,      levels = genes),
+     cell_type = factor(cell_types, levels = cell_types),
+     contrast  = factor(contrasts,  levels = contrasts)
    ) %>%
      mutate(
-       log_fc = rnorm(n(), mean = 0, sd = 2),
-       pvalue = runif(n()),
-       significant = pvalue < 0.05,
-       direction = ifelse(log_fc > 0, "Up", "Down")
+       logFC = rnorm(n(), mean = 0, sd = 1.5),
+       FDR   = runif(n(), 0.001, 0.1)
      ) %>%
-     filter(significant)  # Only show significant results
+     mutate(logFC = ifelse(runif(n()) < 0.4, NA_real_, logFC),
+            FDR   = ifelse(is.na(logFC),     NA_real_, FDR))
 
-   # Create domino plot
+   lo      <- floor(min(de_data$logFC, na.rm = TRUE))
+   up      <- ceiling(max(de_data$logFC, na.rm = TRUE))
+   mid     <- (lo + up) / 2
+   minsize <- floor(min(-log10(de_data$FDR), na.rm = TRUE))
+   maxsize <- ceiling(max(-log10(de_data$FDR), na.rm = TRUE))
+   midsize <- ceiling(quantile(-log10(de_data$FDR), 0.5, na.rm = TRUE))
+
    ggplot(de_data, aes(x = gene, y = cell_type)) +
-     geom_dice(aes(fill = log_fc, size = -log10(pvalue)),
-               dice_shape = "domino") +
-     scale_fill_gradient2(low = "blue", mid = "white", high = "red",
-                         midpoint = 0, 
-                         name = "Log2 Fold Change") +
-     scale_size_continuous(range = c(2, 6), name = "-log10(p-value)") +
-     theme_classic() +
-     theme(axis.text.x = element_text(angle = 45, hjust = 1),
-           panel.grid.major = element_line(color = "grey90")) +
-     labs(title = "Differential Expression Domino Plot",
-          subtitle = "Showing only significant genes (p < 0.05)",
-          x = "Gene", y = "Cell Type")
-
-Working with Real Data: miRNA Example
---------------------------------------
-
-This example shows how to visualize microRNA expression patterns:
-
-.. code-block:: r
-
-   library(ggdiceplot)
-   library(ggplot2)
-   library(dplyr)
-   library(RColorBrewer)
-
-   # Load your miRNA data (example structure)
-   # mirna_data <- read.csv("your_mirna_data.csv")
-   
-   # For demonstration, create sample data
-   set.seed(789)
-   mirna_data <- expand.grid(
-     mirna = paste0("miR-", sample(100:999, 12)),
-     tissue = c("Brain", "Liver", "Heart", "Kidney"),
-     disease = c("Healthy", "Disease")
-   ) %>%
-     mutate(
-       expression_level = sample(c("Low", "Medium", "High"), n(), replace = TRUE),
-       fold_change = rnorm(n(), mean = 0, sd = 1.5)
-     )
-
-   # Create the plot
-   ggplot(mirna_data, aes(x = mirna, y = tissue)) +
-     geom_dice(aes(fill = fold_change, shape = expression_level),
-               dice_size = 0.85) +
-     facet_grid(disease ~ .) +
-     scale_fill_distiller(palette = "RdYlBu", direction = -1,
-                         name = "Fold Change") +
+     geom_dice(
+       aes(dots = contrast, fill = logFC, size = -log10(FDR)),
+       na.rm       = TRUE,
+       show.legend = TRUE,
+       ndots       = length(contrasts),
+       x_length    = length(genes),
+       y_length    = length(cell_types)
+     ) +
+     scale_fill_gradient2(
+       low = "#40004B", high = "#00441B", mid = "white",
+       na.value = "white", limit = c(lo, up), midpoint = mid,
+       name = "Log2FC"
+     ) +
+     scale_size_continuous(
+       limits = c(minsize, maxsize),
+       breaks = c(minsize, midsize, maxsize),
+       labels = c(10^-minsize, 10^-midsize, 10^-maxsize),
+       name   = "FDR"
+     ) +
      theme_minimal() +
      theme(
-       axis.text.x = element_text(angle = 45, hjust = 1, size = 9),
-       strip.background = element_rect(fill = "grey90"),
-       strip.text = element_text(face = "bold")
+       axis.text.x     = element_text(angle = 45, hjust = 1, size = 12),
+       axis.text.y     = element_text(size = 12),
+       legend.text     = element_text(size = 12),
+       legend.title    = element_text(size = 12),
+       legend.key      = element_blank(),
+       legend.key.size = unit(0.8, "cm")
      ) +
-     labs(title = "miRNA Expression Patterns",
-          x = "miRNA", y = "Tissue Type")
-
-Taxonomy Example: Visualizing Hierarchical Data
-------------------------------------------------
-
-ggdiceplot can be used to visualize taxonomic or hierarchical categorical data:
-
-.. code-block:: r
-
-   library(ggdiceplot)
-   library(ggplot2)
-   library(dplyr)
-
-   # Create taxonomic abundance data
-   set.seed(101)
-   taxa_data <- expand.grid(
-     sample = paste("Sample", 1:8),
-     phylum = c("Proteobacteria", "Firmicutes", "Bacteroidetes", "Actinobacteria")
-   ) %>%
-     mutate(
-       class = paste0("Class_", sample(LETTERS[1:3], n(), replace = TRUE)),
-       abundance = runif(n(), 0, 100),
-       prevalence = sample(c("Rare", "Common", "Abundant"), n(), replace = TRUE)
-     )
-
-   # Create dice plot for taxonomy
-   ggplot(taxa_data, aes(x = sample, y = phylum)) +
-     geom_dice(aes(fill = abundance, alpha = prevalence),
-               dice_size = 0.9) +
-     scale_fill_viridis_c(option = "plasma", name = "Abundance (%)") +
-     scale_alpha_manual(values = c("Rare" = 0.3, "Common" = 0.6, "Abundant" = 1.0),
-                       name = "Prevalence") +
-     theme_light() +
-     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-     labs(title = "Microbial Community Structure",
-          subtitle = "Taxonomic abundance across samples",
-          x = "Sample ID", y = "Phylum")
+     labs(x = "Gene", y = "Cell Type", title = "Domino Plot: DEGs across conditions")
 
 Migration Guide: From DicePlot to ggdiceplot
 ---------------------------------------------
 
 If you're transitioning from DicePlot to ggdiceplot, here are the key changes:
 
-1. **Function to Geom**: Replace ``dice_plot()`` function with ``ggplot() + geom_dice()``
+1. **Function to Geom**: Replace ``dice_plot()`` / ``domino_plot()`` functions with ``ggplot() + geom_dice()``
 
 **Old DicePlot syntax:**
 
@@ -304,14 +367,14 @@ If you're transitioning from DicePlot to ggdiceplot, here are the key changes:
 
    # DicePlot (old)
    library(diceplot)
-   
+
    p <- dice_plot(
-     data = my_data,
-     x = "category1",
-     y = "category2",
-     z = "category3",
+     data     = my_data,
+     x        = "category1",
+     y        = "category2",
+     z        = "category3",
      z_colors = my_colors,
-     title = "My Plot"
+     title    = "My Plot"
    )
    print(p)
 
@@ -322,12 +385,17 @@ If you're transitioning from DicePlot to ggdiceplot, here are the key changes:
    # ggdiceplot (new)
    library(ggdiceplot)
    library(ggplot2)
-   
+
    ggplot(my_data, aes(x = category1, y = category2)) +
-     geom_dice(aes(fill = category3)) +
+     geom_dice(
+       aes(dots = category3),
+       ndots    = length(unique(my_data$category3)),
+       x_length = length(unique(my_data$category1)),
+       y_length = length(unique(my_data$category2))
+     ) +
      scale_fill_manual(values = my_colors) +
      labs(title = "My Plot") +
-     theme_minimal()
+     theme_dice()
 
 2. **Parameter Mapping**
 
@@ -338,38 +406,23 @@ If you're transitioning from DicePlot to ggdiceplot, here are the key changes:
    * - DicePlot Parameter
      - ggdiceplot Equivalent
    * - ``x = "var1"``
-     - ``aes(x = var1)`` in ggplot()
+     - ``aes(x = var1)`` in ``ggplot()``
    * - ``y = "var2"``
-     - ``aes(y = var2)`` in ggplot()
+     - ``aes(y = var2)`` in ``ggplot()``
    * - ``z = "var3"``
-     - ``aes(fill = var3)`` in geom_dice()
+     - ``aes(dots = var3)`` in ``geom_dice()``
    * - ``z_colors = colors``
      - ``scale_fill_manual(values = colors)``
    * - ``title = "text"``
      - ``labs(title = "text")``
    * - ``custom_theme = theme_*()``
-     - Add ``+ theme_*()`` as layer
+     - Add ``+ theme_*()`` as a layer, or use ``theme_dice()``
    * - ``min_dot_size``, ``max_dot_size``
      - ``aes(size = var)`` + ``scale_size_continuous()``
+   * - n/a
+     - ``pip_scale`` — controls pip diameter (0–1, default ``0.75``)
 
-3. **Combining Multiple Customizations**
-
-With ggdiceplot, you can easily stack multiple customizations:
-
-.. code-block:: r
-
-   ggplot(data, aes(x = x, y = y)) +
-     geom_dice(aes(fill = var1, color = var2, size = var3)) +
-     scale_fill_brewer(palette = "Set1") +
-     scale_color_manual(values = c("red", "blue")) +
-     scale_size_continuous(range = c(2, 6)) +
-     facet_wrap(~group) +
-     theme_minimal() +
-     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-     labs(title = "Complex Dice Plot", 
-          x = "X Label", y = "Y Label")
-
-4. **Domino Plots**
+3. **Domino Plots**
 
 **Old DicePlot syntax:**
 
@@ -377,13 +430,13 @@ With ggdiceplot, you can easily stack multiple customizations:
 
    # DicePlot domino_plot function
    p <- domino_plot(
-     data = de_data,
+     data      = de_data,
      gene_list = genes,
-     var_id = "contrast",
-     x = "gene",
-     y = "cell_type",
-     log_fc = "logFC",
-     p_val = "FDR"
+     var_id    = "contrast",
+     x         = "gene",
+     y         = "cell_type",
+     log_fc    = "logFC",
+     p_val     = "FDR"
    )
 
 **New ggdiceplot syntax:**
@@ -392,20 +445,25 @@ With ggdiceplot, you can easily stack multiple customizations:
 
    # ggdiceplot with geom_dice
    ggplot(de_data, aes(x = gene, y = cell_type)) +
-     geom_dice(aes(fill = logFC, size = -log10(FDR)),
-               dice_shape = "domino") +
+     geom_dice(
+       aes(dots = contrast, fill = logFC, size = -log10(FDR)),
+       na.rm    = TRUE,
+       ndots    = length(unique(de_data$contrast)),
+       x_length = length(unique(de_data$gene)),
+       y_length = length(unique(de_data$cell_type))
+     ) +
      scale_fill_gradient2(low = "blue", mid = "white", high = "red") +
-     facet_wrap(~contrast) +
-     theme_bw()
+     theme_dice()
 
 Tips for Migration
 ~~~~~~~~~~~~~~~~~~~
 
-1. **Start with the basics**: Convert simple plots first to understand the new syntax
-2. **Use the ggplot2 cheat sheet**: Familiar ggplot2 patterns all work with ggdiceplot
-3. **Leverage faceting**: Use ``facet_wrap()`` or ``facet_grid()`` instead of creating multiple separate plots
-4. **Combine with other geoms**: Add ``geom_text()``, ``geom_hline()``, etc. as needed
-5. **Save plots with ggsave()**: Use ggplot2's ``ggsave()`` function for consistent output
+1. **Start with the basics**: Convert simple plots first to understand the new syntax.
+2. **Use the ggplot2 cheat sheet**: Familiar ggplot2 patterns all work with ggdiceplot.
+3. **Leverage faceting**: Use ``facet_wrap()`` or ``facet_grid()`` instead of creating multiple separate plots.
+4. **Combine with other geoms**: Add ``geom_text()``, ``geom_hline()``, etc. as needed.
+5. **Save plots with ggsave()**: Use ggplot2's ``ggsave()`` function for consistent output.
+6. **pip_scale migration**: If your existing ggdiceplot v1.0.0 plots used the raw ``size`` aesthetic, add ``pip_scale = NULL`` to ``geom_dice()`` to restore exact v1.0.0 pip sizes.
 
 Additional Resources
 --------------------
@@ -454,4 +512,3 @@ We welcome contributions to ggdiceplot! If you'd like to contribute:
 2. Create a new branch for your feature or bug fix
 3. Write tests for your changes
 4. Submit a pull request with a clear description
-
