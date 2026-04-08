@@ -245,7 +245,7 @@ This example uses the built-in ``sample_dice_data2`` dataset:
        range  = c(2, 8),
        limits = c(minsize, maxsize),
        breaks = c(minsize, midsize, maxsize),
-       labels = c(10^minsize, 10^-midsize, 10^-maxsize),
+       labels = c(10^-minsize, 10^-midsize, 10^-maxsize),
        name   = "q-value"
      )
 
@@ -289,7 +289,7 @@ This example uses the built-in ``sample_dice_miRNA`` dataset:
 Domino Plot Example (Gene Expression)
 --------------------------------------
 
-Domino plots visualise differential expression data across multiple conditions and cell types. Use ``geom_dice()`` with a ``dots`` aesthetic mapped to the contrast variable:
+Domino plots visualise differential expression data across multiple conditions and cell types. Use ``geom_dice()`` with a ``dots`` aesthetic mapped to the contrast variable. The example below uses simulated data; substitute your own data frame with the same column structure:
 
 .. code-block:: r
 
@@ -298,41 +298,39 @@ Domino plots visualise differential expression data across multiple conditions a
    library(dplyr)
    library(tidyr)
 
-   zebra.df <- read.csv("legacy examples/data/ZEBRA_sex_degs_set.csv")
-   genes <- c("SPP1", "APOE", "SERPINA1", "PINK1", "ANGPT1",
-              "ANGPT2", "APP", "CLU", "ABCA7")
+   # Simulate differential expression data
+   set.seed(42)
+   genes      <- c("SPP1", "APOE", "SERPINA1", "PINK1", "ANGPT1", "CLU")
+   cell_types <- c("Neuron", "Astrocyte", "Microglia", "Oligodendrocyte")
+   contrasts  <- c("MS-CT", "AD-CT", "ASD-CT", "FTD-CT", "HD-CT")
 
-   zebra.df <- zebra.df %>%
-     filter(gene %in% genes) %>%
-     filter(contrast %in% c("MS-CT", "AD-CT", "ASD-CT", "FTD-CT", "HD-CT")) %>%
+   de_data <- expand.grid(
+     gene      = factor(genes,      levels = genes),
+     cell_type = factor(cell_types, levels = cell_types),
+     contrast  = factor(contrasts,  levels = contrasts)
+   ) %>%
      mutate(
-       cell_type = factor(cell_type, levels = sort(unique(cell_type))),
-       contrast  = factor(contrast,
-                          levels = c("MS-CT", "AD-CT", "ASD-CT", "FTD-CT", "HD-CT")),
-       gene      = factor(gene, levels = genes)
+       logFC = rnorm(n(), mean = 0, sd = 1.5),
+       FDR   = runif(n(), 0.001, 0.1)
      ) %>%
-     filter(PValue < 0.05) %>%
-     group_by(gene, cell_type, contrast) %>%
-     summarise(logFC = mean(logFC, na.rm = TRUE),
-               FDR   = min(FDR,   na.rm = TRUE), .groups = "drop") %>%
-     complete(gene, cell_type, contrast,
-              fill = list(logFC = NA_real_, FDR = NA_real_))
+     mutate(logFC = ifelse(runif(n()) < 0.4, NA_real_, logFC),
+            FDR   = ifelse(is.na(logFC),     NA_real_, FDR))
 
-   lo      <- floor(min(zebra.df$logFC, na.rm = TRUE))
-   up      <- ceiling(max(zebra.df$logFC, na.rm = TRUE))
+   lo      <- floor(min(de_data$logFC, na.rm = TRUE))
+   up      <- ceiling(max(de_data$logFC, na.rm = TRUE))
    mid     <- (lo + up) / 2
-   minsize <- floor(min(-log10(zebra.df$FDR), na.rm = TRUE))
-   maxsize <- ceiling(max(-log10(zebra.df$FDR), na.rm = TRUE))
-   midsize <- ceiling(quantile(-log10(zebra.df$FDR), 0.5, na.rm = TRUE))
+   minsize <- floor(min(-log10(de_data$FDR), na.rm = TRUE))
+   maxsize <- ceiling(max(-log10(de_data$FDR), na.rm = TRUE))
+   midsize <- ceiling(quantile(-log10(de_data$FDR), 0.5, na.rm = TRUE))
 
-   ggplot(zebra.df, aes(x = gene, y = cell_type)) +
+   ggplot(de_data, aes(x = gene, y = cell_type)) +
      geom_dice(
        aes(dots = contrast, fill = logFC, size = -log10(FDR)),
        na.rm       = TRUE,
        show.legend = TRUE,
-       ndots       = 5,
+       ndots       = length(contrasts),
        x_length    = length(genes),
-       y_length    = length(unique(zebra.df$cell_type))
+       y_length    = length(cell_types)
      ) +
      scale_fill_gradient2(
        low = "#40004B", high = "#00441B", mid = "white",
@@ -342,7 +340,7 @@ Domino plots visualise differential expression data across multiple conditions a
      scale_size_continuous(
        limits = c(minsize, maxsize),
        breaks = c(minsize, midsize, maxsize),
-       labels = c(10^minsize, 10^-midsize, 10^-maxsize),
+       labels = c(10^-minsize, 10^-midsize, 10^-maxsize),
        name   = "FDR"
      ) +
      theme_minimal() +
@@ -354,7 +352,7 @@ Domino plots visualise differential expression data across multiple conditions a
        legend.key      = element_blank(),
        legend.key.size = unit(0.8, "cm")
      ) +
-     labs(x = "Gene", y = "Cell Type", title = "ZEBRA Sex DEGs Domino Plot")
+     labs(x = "Gene", y = "Cell Type", title = "Domino Plot: DEGs across conditions")
 
 Migration Guide: From DicePlot to ggdiceplot
 ---------------------------------------------
